@@ -78,7 +78,7 @@ cinaR <-
            batch.information = NULL,
            additional.covariates = NULL,
            sv.number = NULL,
-           run.enrichment = TRUE,
+           run.enrichment = FALSE,
            enrichment.method = NULL,
            enrichment.FDR.cutoff = 1,
            background.genes.size = 20e3,
@@ -322,49 +322,16 @@ annotatePeaks <-
     colnames(bed) <- c("CHR", "Start", "End")
     bed.GRanges <- GenomicRanges::GRanges(bed)
 
-    if (reference.genome == "hg38") {
-      if (!requireNamespace("TxDb.Hsapiens.UCSC.hg38.knownGene", quietly = TRUE)) {
-        
-        message(
-          "Package \"TxDb.Hsapiens.UCSC.hg38.knownGene\" needed for this
-             function to work. Please install it."
-        )
-        return(NULL)
-        
-      }
-      txdb <-
-        TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene
-      genome <- cinaR::grch38
-      reference.genome <- "hg38"
-    } else if (reference.genome == "hg19") {
-      if (!requireNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene", quietly = TRUE)) {
-        message(
-          "Package \"TxDb.Hsapiens.UCSC.hg19.knownGene\" needed for this
-             function to work. Please install it."
-        )
-        return(NULL)
-      }
-      txdb <-
-        TxDb.Hsapiens.UCSC.hg19.knownGene::TxDb.Hsapiens.UCSC.hg19.knownGene
-      genome <- cinaR::grch37
-    } else if (reference.genome == "mm10") {
-      if (!requireNamespace("TxDb.Mmusculus.UCSC.mm10.knownGene", quietly = TRUE)) {
-        message(
-          "Package \"TxDb.Mmusculus.UCSC.mm10.knownGene\" needed for this
-             function to work. Please install it.",
-          call. = FALSE
-        )
-        return(NULL)
-      }
-      txdb <-
-        TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene
-      genome <- cinaR::grcm38
+    if (reference.genome == "GRCm39") {
+      txdb <- readRDS("/lustre/home/acct-medzy/medzy-cai/test/GRCm39_Txdb.Rds")
+    } else if (reference.genome == "GRCh38") {
+      txdb <- readRDS("/lustre/home/acct-medzy/medzy-cai/test/GRCh38_Txdb.Rds")
     } else {
-      stop ("reference.genome should be 'hg38', 'hg19' or 'mm10'")
+      stop ("reference.genome should be 'GRCh38' or 'GRCm39'")
     }
 
-    # annotate peaks
-    annoPeaks <- ChIPseeker::annotatePeak(bed.GRanges, TxDb = txdb, verbose = verbose)
+    # annotate peaks define tssRegion
+    annoPeaks <- ChIPseeker::annotatePeak(reduce(bed.GRanges), TxDb = txdb, tssRegion=c(-3000, 3000),verbose = verbose)
 
 
     if (show.annotation.pie) {
@@ -372,20 +339,21 @@ annotatePeaks <-
     }
 
     annoPeaks.anno <- annoPeaks@anno
-    entrezids <- unique(annoPeaks.anno$geneId)
+    # entrezids <- unique(annoPeaks.anno$geneId)
 
 
 
     # entrez to gene name mapping
-    entrez2gene <-
-      base::subset(genome,
-                   genome$entrez %in% entrezids,
-                   select = c('entrez', 'symbol'))
+    # entrez2gene <- base::subset(genome, genome$entrez %in% entrezids, select = c('entrez', 'symbol'))
 
     # Match to each annotation dataframe
-    m <- match(annoPeaks.anno$geneId, entrez2gene$entrez)
-    annoPeaks.anno$gene_name <- entrez2gene$symbol[m]
-
+    # m <- match(annoPeaks.anno$geneId, entrez2gene$entrez)
+    # annoPeaks.anno$gene_name <- entrez2gene$symbol[m]
+    if (nrow(data.frame(annoPeaks.anno))==nrow(cp)){
+      print("Differential Analysing")
+    } else {
+      stop ("ncol of annotated peak table did not match peak set")
+    }
     return(cbind(data.frame(annoPeaks.anno), cp))
   }
 
@@ -437,8 +405,8 @@ differentialAnalyses <- function(final.matrix,
 
   if (experiment.type == "ATAC-Seq"){
 
-    cp.meta <- final.matrix[, 1:15]
-    cp.metaless <- final.matrix[, 16:ncol(final.matrix)]
+    cp.meta <- final.matrix[, 1:14]
+    cp.metaless <- final.matrix[, 15:ncol(final.matrix)]
 
   } else { # RNA-seq
     cp.metaless <- final.matrix
