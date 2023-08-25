@@ -15,7 +15,7 @@
 #' @param library.threshold number of libraries a peak occurs so that it is not filtered default set to 2
 #' @param cpm.threshold count per million threshold for not to filter a peak
 #' @param show.annotation.pie shows the annotation pie chart produced with ChipSeeker
-#' @param reference.genome genome of interested species. It should be 'hg38', 'hg19' or 'mm10'.
+#' @param reference.genome genome of interested species. It should be 'GRCm39' or 'GRCh38'.
 #' @param DA.fdr.threshold fdr cut-off for differential analyses
 #' @param DA.lfc.threshold log-fold change cutoff for differential analyses
 #' @param comparison.scheme either one-vs-one (OVO) or one-vs-all (OVA) comparisons.
@@ -50,7 +50,7 @@
 #' contrasts <- sapply(strsplit(colnames(bed), split = "-", fixed = TRUE),
 #'                     function(x){x[1]})[4:25]
 #'
-#' results <- cinaR(bed, contrasts, reference.genome = "mm10")
+#' results <- cinaR(bed, contrasts, reference.genome = "GRCm39")
 #' }
 #'
 #'
@@ -92,8 +92,8 @@ cinaR <-
 
 
     if (is.null(reference.genome)) {
-      warning("'reference.genome' is not set, therefore hg38 will be used!")
-      reference.genome <- "hg38"
+      warning("'reference.genome' is not set, therefore GRCm39 will be used!")
+      reference.genome <- "GRCm39"
     }
 
     if (experiment.type == "ATAC-Seq"){
@@ -305,7 +305,7 @@ normalizeConsensus <-
 #' Runs DA pipeline and makes it ready for enrichment analyses
 #'
 #' @param cp bed formatted consensus peak matrix: CHR, START, STOP and raw peak counts (peaks by 3+samples)
-#' @param reference.genome genome of interested species. It should be 'hg38', 'hg19' or 'mm10'.
+#' @param reference.genome genome of interested species. It should be 'GRCm39' or 'GRCh38'.
 #' @param show.annotation.pie shows the annotation pie chart produced with ChipSeeker
 #' @param verbose prints messages through running the pipeline
 #'
