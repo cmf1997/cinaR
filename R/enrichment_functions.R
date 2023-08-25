@@ -120,7 +120,7 @@ GSEA <- function(genes, geneset) {
 #' @param experiment.type The type of experiment either set to "ATAC-Seq" or "RNA-Seq"
 #' @param enrichment.FDR.cutoff FDR cut-off for enriched terms, p-values
 #' are corrected by Benjamini-Hochberg procedure
-#' @param reference.genome genome of interested species. It should be 'hg38', 'hg19' or 'mm10'.
+#' @param reference.genome genome of interested species. It should be 'GRCm39' or 'GRCh38'.
 #' @param background.genes.size number of background genes for hyper-geometric p-value
 #' calculations. Default is 20,000.
 #' @param geneset Pathways to be used in enrichment analyses. If not set vp2008 (Chaussabel, 2008)
